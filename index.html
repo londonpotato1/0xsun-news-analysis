@@ -70,7 +70,7 @@
     </h1>
     <p class="mt-3 max-w-3xl text-slate-300">
       0xSun의 6개 이벤트 복기를 <span class="text-violet-300">30+개 봇 포트폴리오</span>와 교차 매핑.
-      감지봇_v2(12거래소 WS) · hot-wallet-monitor · cex_dominance_bot · 현선봇_go를 조합해
+      WS 감지 레이어 · 지갑 추적기 · 인텔리전스 스택 · basis 봇을 조합해
       <span class="text-cyan-300">방향성 × 변동성</span> 두 축을 동시에 잡는 실행 가능한 전략 대시보드.
     </p>
     <div class="mt-5 grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -166,7 +166,7 @@
           <td><span class="badge-part">정황 근거</span><div class="text-[10px] text-slate-500 mt-1">트위터 다수 트레이더 수익 증언 · 공식 보고서 없음</div></td>
           <td><span class="chip chip-brand">지정가 그리드</span><br><span class="text-[11px] text-slate-400">고점 매도·저점 매수 반복</span></td>
           <td>
-            <div class="text-xs"><span class="badge-ver">감지봇_v2</span></div>
+            <div class="text-xs"><span class="badge-ver">WS 감지 레이어</span></div>
             <div class="text-[11px] text-slate-400 mt-1">12거래소 WS + 거래량 Z-score 이미 존재 → 트리거만 추가</div>
           </td>
         </tr>
@@ -182,8 +182,8 @@
           <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">Bitget/Coincu 뉴스 · 펀딩 급등 확인 (4%→20% 캡 변경은 보도 無, 펀딩 숫자만 검증)</div></td>
           <td><span class="chip chip-down">Lighter ARC 숏</span><br><span class="chip chip-up mt-1">Lighter ARC 펀딩 수취</span></td>
           <td>
-            <div class="text-xs"><span class="badge-ver">펀딩비트래커봇</span></div>
-            <div class="text-[11px] text-slate-400 mt-1">Lighter WS 이미 감지봇_v2에 존재 → 펀딩 스냅샷 + 공지 연결 누락</div>
+            <div class="text-xs"><span class="badge-ver">펀딩 트래커</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">Lighter WS 이미 감지 레이어에 존재 → 펀딩 스냅샷 + 공지 연결 누락</div>
           </td>
         </tr>
         <tr>
@@ -198,7 +198,7 @@
           <td><span class="badge-part">정황 근거</span><div class="text-[10px] text-slate-500 mt-1">패턴은 공지 多, 특정 클러스터 공개 링크 부재</div></td>
           <td><span class="chip chip-down">조작 시점 숏</span><br><span class="chip chip-slate mt-1">청산가 근접 시 가속</span></td>
           <td>
-            <div class="text-xs"><span class="badge-ver">hot-wallet-monitor</span></div>
+            <div class="text-xs"><span class="badge-ver">지갑 추적기</span></div>
             <div class="text-[11px] text-slate-400 mt-1">Solana/EVM 추적 존재 → 클러스터링·청산가 추정 추가</div>
           </td>
         </tr>
@@ -214,7 +214,7 @@
           <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">CCN/Coinpedia/Yahoo · 37K TAO 덤프·$10M 롱 청산</div></td>
           <td><span class="chip chip-down">TAO 숏</span><br><span class="chip chip-down mt-1">서브넷 알파 토큰 숏</span></td>
           <td>
-            <div class="text-xs"><span class="badge-new">news_signal_bot 확장</span></div>
+            <div class="text-xs"><span class="badge-new">이벤트 파이프라인</span></div>
             <div class="text-[11px] text-slate-400 mt-1">KOL watcher · subnet topology 맵 필요</div>
           </td>
         </tr>
@@ -264,47 +264,13 @@
 <section class="max-w-7xl mx-auto px-6 py-10">
   <div class="flex items-baseline justify-between gap-4">
     <div>
-      <div class="text-xs tracking-widest text-slate-500 uppercase">03 · Your Stack × News Strategy</div>
-      <h2 class="sectionTitle mt-1 text-white">이미 가진 인프라 · 남은 격차</h2>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">03 · Infrastructure Gaps</div>
+      <h2 class="sectionTitle mt-1 text-white">필요한 구성요소 · 없거나 약한 것들</h2>
     </div>
-    <div class="text-xs text-slate-500">Inventory-first · 1:1 mapping 원칙</div>
+    <div class="text-xs text-slate-500">Build-first 관점 · 각 모듈은 단일 책임</div>
   </div>
 
-  <div class="mt-5 grid md:grid-cols-2 gap-4">
-    <!-- Have -->
-    <div class="glass rounded-2xl p-5">
-      <div class="flex items-center gap-2">
-        <span class="chip chip-up">HAVE</span>
-        <div class="text-sm text-slate-400">즉시 재사용 가능 자산</div>
-      </div>
-      <div class="mt-4 space-y-3 text-sm">
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">감지봇_v2</div>
-          <div class="text-slate-300">12거래소 WebSocket (Binance/Bybit/OKX/Bitget/Gate/HTX/KuCoin/Kraken/Coinbase/MEXC/Lighter/Hyperliquid) + orderbook_checker + listing_monitor + premium_tick_collector. <span class="text-emerald-300">→ 거래량 Z-score 모듈만 추가</span>하면 Case 1 커버.</div>
-        </div>
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">hot-wallet-monitor</div>
-          <div class="text-slate-300">Solana/EVM/Tron 추적기 존재. <span class="text-emerald-300">→ 지갑 클러스터 라벨링 + 청산가 근접 감지</span> 덧붙이면 Case 3 대응.</div>
-        </div>
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">cex_dominance_bot</div>
-          <div class="text-slate-300">Claude API + Playwright + SQLite WAL + GO/NO-GO 스코어. <span class="text-emerald-300">→ 공지/트윗 페이지 스크래퍼</span> 추가 시 Case 2/5의 "해석 엔진" 그대로 활용.</div>
-        </div>
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">통합매도봇</div>
-          <div class="text-slate-300">Go 11거래소 어댑터 + 시장가/지정가 실행기 + KRW 상장 아비트라지. <span class="text-emerald-300">→ "뉴스 트리거 실행기"의 베이스 런타임</span>으로 직결 가능.</div>
-        </div>
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">펀딩비트래커봇</div>
-          <div class="text-slate-300">FastAPI + Next.js 트래커. <span class="text-emerald-300">→ 펀딩비 레짐 변화 감지기</span> (|Δfunding| &gt; 3σ) 추가 시 Case 2 자동화.</div>
-        </div>
-        <div class="flex items-start gap-3">
-          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">현선봇_go / 통합김프봇</div>
-          <div class="text-slate-300">Go + Wails 클린 레이어 + Fernet env. <span class="text-emerald-300">→ 이벤트 드리븐 basis/premium trade</span>의 실행 계층.</div>
-        </div>
-      </div>
-    </div>
-
+  <div class="mt-5 grid gap-4">
     <!-- Missing -->
     <div class="glass rounded-2xl p-5">
       <div class="flex items-center gap-2">
@@ -312,7 +278,7 @@
         <div class="text-sm text-slate-400">없거나 약한 구성요소</div>
       </div>
       <div class="mt-4 space-y-3 text-sm">
-        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">KOL watcher</div><div class="text-slate-300">X/Twitter 화이트리스트 20인의 트윗을 저지연 수집 (Nitter/Nitter-RSS/fxtwitter 다중 백엔드). <span class="text-amber-300">news_signal_bot 내부에 구현 예정/부재</span>.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">KOL watcher</div><div class="text-slate-300">X/Twitter 화이트리스트 20인의 트윗을 저지연 수집 (Nitter/Nitter-RSS/fxtwitter 다중 백엔드). <span class="text-amber-300">현재 미구현</span>.</div></div>
         <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">공지 스크래퍼</div><div class="text-slate-300">Lighter · Hyperliquid · Bybit · Binance · Upbit · Bithumb 공지 페이지 diff 감지 + LLM 분류 (펀딩 변경/상장/파라미터).</div></div>
         <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">DeFi 전염맵</div><div class="text-slate-300">Aave/Compound/Euler/Morpho의 collateral exposure 주기적 스냅샷 + 해킹 토큰 → 영향 프로토콜 즉시 매핑.</div></div>
         <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">이벤트 분류기</div><div class="text-slate-300">actionable vs noise · 방향 · 시간 스케일 · 심볼 추출. Claude/GPT 혼합, 규칙 기반 사전필터로 토큰 비용 제한.</div></div>
@@ -390,7 +356,7 @@
       </div>
       <div class="mt-3 text-xs text-slate-500 mono">python · playwright · difflib · Claude Haiku 분류</div>
       <div class="mt-2 bar"><span style="width:5%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일 · cex_dominance_bot Playwright 재활용</div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일 · Playwright 어댑터 재활용</div>
     </div>
 
     <!-- Card 4 -->
@@ -399,7 +365,7 @@
         <div>
           <div class="text-xs text-violet-300 mono">M4 · P1</div>
           <div class="text-lg font-semibold mt-1">volume_zscore_trigger</div>
-          <div class="text-xs text-slate-400 mt-1">감지봇_v2 확장 · 이상 거래량 → 그리드 배포</div>
+          <div class="text-xs text-slate-400 mt-1">감지 레이어 확장 · 이상 거래량 → 그리드 배포</div>
         </div>
         <span class="chip chip-cyan">Case 1</span>
       </div>
@@ -437,7 +403,7 @@
         <div>
           <div class="text-xs text-violet-300 mono">M6 · P1</div>
           <div class="text-lg font-semibold mt-1">wallet_cluster_tracker</div>
-          <div class="text-xs text-slate-400 mt-1">hot-wallet-monitor 확장 · 청산가·출금 임박 지표</div>
+          <div class="text-xs text-slate-400 mt-1">지갑 추적기 확장 · 청산가·출금 임박 지표</div>
         </div>
         <span class="chip chip-brand">Case 3</span>
       </div>
@@ -460,7 +426,7 @@
         <span class="chip chip-slate">Reality Check</span>
       </div>
       <div class="mt-3 text-sm text-slate-300">
-        SQLite WAL(cex_dominance_bot 패턴) 재사용. 이벤트 타임스탬프 + 1분봉 JOIN으로 <span class="text-emerald-300">사후 PnL</span> 자동 산출.
+        SQLite WAL 패턴 재사용. 이벤트 타임스탬프 + 1분봉 JOIN으로 <span class="text-emerald-300">사후 PnL</span> 자동 산출.
         <span class="text-rose-300">Survivorship bias</span> 탐지: 실패 거래까지 전부 기록 의무.
       </div>
       <div class="mt-3 text-xs text-slate-500 mono">python · sqlite · pandas · streamlit dashboard</div>
@@ -621,7 +587,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>1 ETH MM 오작동</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td>감지봇_v2 Z-score</td></tr>
+          <tr><td>1 ETH MM 오작동</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td>WS Z-score</td></tr>
           <tr><td>2 Lighter ARC 펀딩</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td>공지 + 펀딩 스냅샷</td></tr>
           <tr><td>3 Fartcoin 지갑</td><td class="text-center text-amber-400">◐</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td>Hyperliquid API 잔고</td></tr>
           <tr><td>4 TAO Covenant 이탈</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-amber-400">◐</td><td class="text-center text-slate-600">—</td><td>프로젝트 공식 계정</td></tr>
@@ -730,7 +696,7 @@
   <div class="mt-4 grid md:grid-cols-2 gap-4">
     <div class="glass rounded-2xl p-5">
       <div class="text-sm font-semibold text-white">알트 숏 바스켓 · 0xSun 선정 기준 이식</div>
-      <div class="text-xs text-slate-500 mt-1">cex_dominance_bot GO/NO-GO 스코어에 3필터 추가만</div>
+      <div class="text-xs text-slate-500 mt-1">GO/NO-GO 스코어 엔진에 3필터 추가</div>
       <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
         <li>• <span class="text-violet-300">비완전유통</span>: circulating / max supply &lt; 50%</li>
         <li>• <span class="text-violet-300">신규 아님</span>: 상장일 &gt; 12개월</li>
@@ -788,7 +754,7 @@
         <ul class="mt-2 text-xs text-slate-300 space-y-1">
           <li>• M2 kol_watcher (20인 화이트리스트)</li>
           <li>• M3 exchange_notice_diff (9거래소)</li>
-          <li>• M4 volume_zscore_trigger (감지봇_v2 확장)</li>
+          <li>• M4 volume_zscore_trigger (감지 레이어 확장)</li>
           <li>• paper trade 모드</li>
         </ul>
         <div class="mt-3 text-[11px] text-slate-500">게이트: 2주간 라이브 신호 수집 · 사후 PnL ≥ 0 확인 전 실매매 금지</div>
@@ -816,7 +782,7 @@
         <div class="text-xs text-violet-300 mono">WEEK 4 · EXECUTE</div>
         <div class="mt-1 font-semibold text-white">Execution + Retro</div>
         <ul class="mt-2 text-xs text-slate-300 space-y-1">
-          <li>• 통합매도봇 런타임 연동</li>
+          <li>• 실행 런타임 연동</li>
           <li>• 멱등 client_order_id 전체 어댑터 적용</li>
           <li>• backtester + 주간 retro 자동화</li>
           <li>• 실거래 전환 (testnet 48h 선행)</li>
@@ -891,7 +857,7 @@
   <div class="mt-5 grid md:grid-cols-3 gap-4">
     <div class="grid-card p-5 ribbon">
       <div class="text-xs text-violet-300 mono">Action 1 · 30분</div>
-      <div class="text-lg font-semibold text-white mt-1">news_signal_bot 스켈레톤 커밋</div>
+      <div class="text-lg font-semibold text-white mt-1">signal-hub 스켈레톤 커밋</div>
       <p class="text-sm text-slate-300 mt-1"><span class="kbd">domain/</span> · <span class="kbd">application/</span> · <span class="kbd">infrastructure/</span> 디렉토리 + README 30줄. 파일 0개도 OK, 경계만 확정.</p>
     </div>
     <div class="grid-card p-5 ribbon">
@@ -901,7 +867,7 @@
     </div>
     <div class="grid-card p-5 ribbon">
       <div class="text-xs text-violet-300 mono">Action 3 · 3시간</div>
-      <div class="text-lg font-semibold text-white mt-1">감지봇_v2 volume Z-score 브랜치</div>
+      <div class="text-lg font-semibold text-white mt-1">감지 레이어에 volume Z-score 브랜치</div>
       <p class="text-sm text-slate-300 mt-1">premium_tick_storage 옆에 volume_zscore.py 추가. 20일 롤링, Z &gt; 6 이벤트를 signal_hub로 퍼블리시. 주문은 아직 없이 <span class="text-emerald-300">paper mode</span>.</p>
     </div>
   </div>

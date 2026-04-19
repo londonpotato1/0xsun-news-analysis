@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>뉴스 트레이딩 전략 대시보드 · 0xSun 복기 + 나의 봇 생태계 매핑</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --bg:#07080c; --bg2:#0c0f18; --card:#0f1320; --edge:#1e2434;
+    --ink:#e6e9f2; --ink2:#9aa3b8; --ink3:#636c82;
+    --brand:#8b5cf6; --brand2:#06b6d4; --accent:#f59e0b;
+    --up:#10b981; --down:#ef4444; --neu:#64748b;
+  }
+  html,body{background:radial-gradient(1400px 800px at 15% -10%,#1a0f3a 0%,transparent 55%),radial-gradient(1000px 600px at 110% 10%,#063645 0%,transparent 50%),var(--bg);color:var(--ink);font-family:'Pretendard',-apple-system,'SF Pro Text','Noto Sans KR',ui-sans-serif,system-ui;}
+  .mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;}
+  .glass{background:linear-gradient(180deg,rgba(18,22,35,.7),rgba(14,17,28,.6));backdrop-filter:blur(10px);border:1px solid var(--edge);}
+  .gradient-text{background:linear-gradient(90deg,#a78bfa,#22d3ee 60%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;font-size:.7rem;font-weight:500;border:1px solid var(--edge);background:rgba(255,255,255,.02);}
+  .chip-up{color:#34d399;border-color:#0b3a2b;background:rgba(16,185,129,.07);}
+  .chip-down{color:#f87171;border-color:#3a0b0b;background:rgba(239,68,68,.07);}
+  .chip-brand{color:#c4b5fd;border-color:#2a1a4a;background:rgba(139,92,246,.10);}
+  .chip-acc{color:#fbbf24;border-color:#3a2a0b;background:rgba(245,158,11,.08);}
+  .chip-cyan{color:#67e8f9;border-color:#0c3a44;background:rgba(6,182,212,.08);}
+  .chip-slate{color:#cbd5e1;border-color:#1e293b;background:rgba(148,163,184,.06);}
+  .hash{color:#64748b;}
+  .rowhover tr:hover td{background:rgba(139,92,246,.05);}
+  table{border-collapse:separate;border-spacing:0;}
+  th{position:sticky;top:0;background:#0a0d17;font-weight:500;color:#9aa3b8;text-align:left;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;}
+  th,td{padding:.65rem .75rem;border-bottom:1px solid #141826;vertical-align:top;}
+  .sectionTitle{font-size:1.45rem;font-weight:600;letter-spacing:-.01em;}
+  .grid-card{background:linear-gradient(180deg,rgba(22,27,44,.85),rgba(12,15,25,.7));border:1px solid var(--edge);border-radius:14px;}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;box-shadow:0 0 10px currentColor;}
+  .divider-y{background:linear-gradient(180deg,transparent,#1e2434,transparent);width:1px;}
+  .kbd{font-family:'JetBrains Mono',monospace;font-size:.72rem;border:1px solid #2a3148;background:#10131f;padding:.1rem .35rem;border-radius:4px;color:#c4b5fd;}
+  .ribbon{background:linear-gradient(90deg,rgba(139,92,246,.14),rgba(6,182,212,.14));border:1px solid #273049;}
+  .h-scroll::-webkit-scrollbar{height:8px;}
+  .h-scroll::-webkit-scrollbar-thumb{background:#232941;border-radius:99px;}
+  .ptrn{background-image:linear-gradient(45deg,rgba(255,255,255,.02) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.02) 50%,rgba(255,255,255,.02) 75%,transparent 75%,transparent);background-size:12px 12px;}
+  .num{font-variant-numeric:tabular-nums;}
+  .badge-ver{background:linear-gradient(90deg,#0b3a2b,#0d4738);color:#6ee7b7;border:1px solid #115e4d;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;}
+  .badge-part{background:#3a2a0b;color:#fcd34d;border:1px solid #7c5b10;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;}
+  .badge-new{background:linear-gradient(90deg,#1f1b4a,#2a1252);color:#c4b5fd;border:1px solid #4c1d95;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;}
+  .glow-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#8b5cf6 30%,#22d3ee 70%,transparent);opacity:.4;}
+  .step{position:relative;padding-left:2rem;}
+  .step::before{content:"";position:absolute;left:.55rem;top:.35rem;bottom:-1.5rem;width:1px;background:linear-gradient(180deg,#8b5cf6,#22d3ee);opacity:.35;}
+  .step:last-child::before{display:none;}
+  .step-dot{position:absolute;left:0;top:.25rem;width:1.2rem;height:1.2rem;border-radius:50%;background:#0c0f18;border:2px solid #8b5cf6;color:#c4b5fd;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;}
+  details>summary{list-style:none;cursor:pointer;}
+  details>summary::-webkit-details-marker{display:none;}
+  .bar{height:6px;background:#141826;border-radius:99px;overflow:hidden;}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#22d3ee);}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ============== HERO ============== -->
+<header class="relative overflow-hidden">
+  <div class="absolute inset-0 ptrn opacity-40"></div>
+  <div class="max-w-7xl mx-auto px-6 pt-10 pb-8 relative">
+    <div class="flex items-center gap-2 text-xs text-slate-400">
+      <span class="chip chip-brand">● Live Analysis</span>
+      <span class="chip chip-slate">Source: @0xSunNFT · 2026-04-19 07:06 UTC · 89K views</span>
+      <span class="chip chip-cyan">Fact-checked · 6 events</span>
+      <span class="chip chip-acc">Tailored to londonpotato1 stack</span>
+    </div>
+    <h1 class="mt-4 text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
+      <span class="gradient-text">News-Driven Alpha</span><br>
+      <span class="text-white">내 봇 생태계에 어떻게 이식할 것인가</span>
+    </h1>
+    <p class="mt-3 max-w-3xl text-slate-300">
+      0xSun의 6개 이벤트 복기를 <span class="text-violet-300">30+개 봇 포트폴리오</span>와 교차 매핑.
+      감지봇_v2(12거래소 WS) · hot-wallet-monitor · cex_dominance_bot · 현선봇_go를 조합해
+      <span class="text-cyan-300">방향성 × 변동성</span> 두 축을 동시에 잡는 실행 가능한 전략 대시보드.
+    </p>
+    <div class="mt-5 grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="grid-card p-4"><div class="text-[10px] text-slate-400 tracking-widest uppercase">핵심 명제</div><div class="mt-1 text-xl font-semibold text-white">방향 × 변동성</div><div class="text-xs text-slate-500 mt-1">둘 다 동시에 잡히는 유일한 축</div></div>
+      <div class="grid-card p-4"><div class="text-[10px] text-slate-400 tracking-widest uppercase">두 우위</div><div class="mt-1 text-xl font-semibold text-white">속도 <span class="text-slate-500">or</span> 해석</div><div class="text-xs text-slate-500 mt-1">KOL / 공지 / 온체인 / 거래량 이상</div></div>
+      <div class="grid-card p-4"><div class="text-[10px] text-slate-400 tracking-widest uppercase">내 스택 활용률</div><div class="mt-1 text-xl font-semibold text-emerald-400 num">67%</div><div class="bar mt-2"><span style="width:67%"></span></div><div class="text-xs text-slate-500 mt-1">6사례 중 4 케이스 즉시 적용 가능</div></div>
+      <div class="grid-card p-4"><div class="text-[10px] text-slate-400 tracking-widest uppercase">신규 모듈 필요</div><div class="mt-1 text-xl font-semibold text-violet-300 num">7개</div><div class="text-xs text-slate-500 mt-1">KOL watcher · 공지 스크래퍼 · 전염맵…</div></div>
+      <div class="grid-card p-4"><div class="text-[10px] text-slate-400 tracking-widest uppercase">포지션 레짐</div><div class="mt-1 text-xl font-semibold text-amber-300">BTC L / Alt S</div><div class="text-xs text-slate-500 mt-1">비완전유통·서사 노후 알트 숏</div></div>
+    </div>
+  </div>
+  <div class="glow-line" style="bottom:0;"></div>
+</header>
+
+<!-- ============== THESIS DECOMPOSITION ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">01 · Thesis Decomposition</div>
+      <h2 class="sectionTitle mt-1 text-white">왜 뉴스 트레이딩은 여전히 알파가 남아있는가</h2>
+    </div>
+    <div class="text-xs text-slate-500">방향성 판단 가능 + 집단 반응 = 변동성</div>
+  </div>
+
+  <div class="mt-5 grid md:grid-cols-3 gap-4">
+    <div class="glass rounded-2xl p-5">
+      <div class="flex items-center gap-2"><span class="dot" style="color:#a78bfa"></span><div class="text-sm font-semibold">Edge 1 · 속도 (Speed Edge)</div></div>
+      <div class="text-xs text-slate-400 mt-1">엄청난 에너지 투입 → 정보→해석→대응을 초·분 단위로 압축</div>
+      <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
+        <li>• 24/7 파이프라인, 중복 없는 스트리밍 소스</li>
+        <li>• 분류기가 <span class="text-violet-300">거래 가능(actionable)</span>한 이벤트만 통과</li>
+        <li>• 주문기는 <span class="text-cyan-300">멱등</span> (client_order_id 기반 중복 방지)</li>
+        <li>• 레이턴시 예산: 공지→주문 &lt; 5초, KOL→주문 &lt; 30초</li>
+      </ul>
+    </div>
+    <div class="glass rounded-2xl p-5">
+      <div class="flex items-center gap-2"><span class="dot" style="color:#22d3ee"></span><div class="text-sm font-semibold">Edge 2 · 해석 (Interpretation Edge)</div></div>
+      <div class="text-xs text-slate-400 mt-1">진입이 늦어도 구조적 영향을 먼저 읽으면 알파</div>
+      <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
+        <li>• 이벤트가 <span class="text-violet-300">일시적 노이즈</span>인지 <span class="text-amber-300">서사 파괴</span>인지 구분</li>
+        <li>• 2차 전염 경로 (담보·LP·브리지·서브넷 연결) 매핑</li>
+        <li>• 유사 과거 사례 검색 (XPL Hyperliquid, LUNA, FTX …)</li>
+        <li>• LLM = <span class="text-slate-200">분류 보조</span>, 포지션 사이징은 규칙 기반</li>
+      </ul>
+    </div>
+    <div class="glass rounded-2xl p-5 ribbon">
+      <div class="flex items-center gap-2"><span class="dot" style="color:#f59e0b"></span><div class="text-sm font-semibold">0xSun이 말하지 않은 진실</div></div>
+      <div class="text-xs text-slate-400 mt-1">Survivorship bias 경고 · 복기는 오른쪽 꼬리만 보여준다</div>
+      <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
+        <li>• 6사례는 <span class="text-rose-300">사후 선택된 winner</span>들</li>
+        <li>• 동기간 실패한 "이벤트 페이드" 거래가 훨씬 많을 것</li>
+        <li>• Arc/Rave 숏 진입: 락커·마켓메이커 역저격 리스크 실존</li>
+        <li>• 따라서: <span class="text-emerald-300">포지션 사이징 룰</span>이 전략보다 중요</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== VERIFIED CASE STUDY MATRIX ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">02 · Verified Case Studies</div>
+      <h2 class="sectionTitle mt-1 text-white">6개 이벤트 · 팩트체크 + 채널 분해</h2>
+    </div>
+    <div class="text-xs text-slate-500">모든 수치 공개 기사 교차검증</div>
+  </div>
+
+  <div class="mt-5 grid-card overflow-hidden">
+    <div class="overflow-x-auto h-scroll">
+    <table class="min-w-full text-sm rowhover">
+      <thead>
+        <tr>
+          <th class="w-8">#</th>
+          <th>이벤트 / 날짜</th>
+          <th>감지 채널</th>
+          <th>시간 창</th>
+          <th>가격 충격</th>
+          <th>검증</th>
+          <th>진입 가능 방향</th>
+          <th class="w-[200px]">내 봇 매핑</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono text-slate-500">1</td>
+          <td>
+            <div class="font-medium">ETH MM 스크립트 오작동</div>
+            <div class="text-xs text-slate-500">2월 · 약 10분간 $2040–2060 핑퐁</div>
+          </td>
+          <td><span class="chip chip-cyan">거래량 이상</span><br><span class="chip chip-slate mt-1">1분봉 깜빡임</span></td>
+          <td><span class="mono">~10min</span></td>
+          <td><span class="chip chip-slate">±1% 반복 진폭</span></td>
+          <td><span class="badge-part">정황 근거</span><div class="text-[10px] text-slate-500 mt-1">트위터 다수 트레이더 수익 증언 · 공식 보고서 없음</div></td>
+          <td><span class="chip chip-brand">지정가 그리드</span><br><span class="text-[11px] text-slate-400">고점 매도·저점 매수 반복</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-ver">감지봇_v2</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">12거래소 WS + 거래량 Z-score 이미 존재 → 트리거만 추가</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono text-slate-500">2</td>
+          <td>
+            <div class="font-medium">Lighter ARC 펀딩비 이상 급등</div>
+            <div class="text-xs text-slate-500">2월 26일 · ~2100% annualized 도달</div>
+          </td>
+          <td><span class="chip chip-acc">거래소 공지</span><br><span class="chip chip-slate mt-1">펀딩 스냅샷</span></td>
+          <td><span class="mono">8h</span></td>
+          <td><span class="chip chip-down">$0.11 → $0.035 (−68%)</span></td>
+          <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">Bitget/Coincu 뉴스 · 펀딩 급등 확인 (4%→20% 캡 변경은 보도 無, 펀딩 숫자만 검증)</div></td>
+          <td><span class="chip chip-down">Lighter ARC 숏</span><br><span class="chip chip-up mt-1">Lighter ARC 펀딩 수취</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-ver">펀딩비트래커봇</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">Lighter WS 이미 감지봇_v2에 존재 → 펀딩 스냅샷 + 공지 연결 누락</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono text-slate-500">3</td>
+          <td>
+            <div class="font-medium">Fartcoin 지갑 클러스터 역저격</div>
+            <div class="text-xs text-slate-500">Hyperliquid 조작 시나리오 ─ XPL 유사</div>
+          </td>
+          <td><span class="chip chip-brand">온체인 지갑</span><br><span class="chip chip-slate mt-1">출금 플로우</span></td>
+          <td><span class="mono">hours</span></td>
+          <td><span class="chip chip-down">$0.25 → $0.17 (−32%)</span></td>
+          <td><span class="badge-part">정황 근거</span><div class="text-[10px] text-slate-500 mt-1">패턴은 공지 多, 특정 클러스터 공개 링크 부재</div></td>
+          <td><span class="chip chip-down">조작 시점 숏</span><br><span class="chip chip-slate mt-1">청산가 근접 시 가속</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-ver">hot-wallet-monitor</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">Solana/EVM 추적 존재 → 클러스터링·청산가 추정 추가</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono text-slate-500">4</td>
+          <td>
+            <div class="font-medium">Covenant AI, TAO 생태계 이탈</div>
+            <div class="text-xs text-slate-500">4월 10일 · Templar(SN3)+Basilica+Grail 운영 중단</div>
+          </td>
+          <td><span class="chip chip-cyan">프로젝트 공식 발표</span><br><span class="chip chip-slate mt-1">KOL 반응</span></td>
+          <td><span class="mono">5h → days</span></td>
+          <td><span class="chip chip-down">$330 → $240 (−27%)</span></td>
+          <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">CCN/Coinpedia/Yahoo · 37K TAO 덤프·$10M 롱 청산</div></td>
+          <td><span class="chip chip-down">TAO 숏</span><br><span class="chip chip-down mt-1">서브넷 알파 토큰 숏</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-new">news_signal_bot 확장</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">KOL watcher · subnet topology 맵 필요</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono text-slate-500">5</td>
+          <td>
+            <div class="font-medium">ZachXBT → RAVE 조사 촉구</div>
+            <div class="text-xs text-slate-500">4월 18일 · 90% 물량 집중, Bitget/Binance 조사 착수</div>
+          </td>
+          <td><span class="chip chip-brand">온체인 + KOL 트윗</span><br><span class="chip chip-slate mt-1">거래소 CEO 반응</span></td>
+          <td><span class="mono">14h</span></td>
+          <td><span class="chip chip-down">$20 → &lt;$1 (−95%)</span></td>
+          <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">Coindesk · Bitget Gracy / Binance Richard Teng 공개 대응</div></td>
+          <td><span class="chip chip-down">숏 진입</span><br><span class="chip chip-acc mt-1">상장 중단/패널티 대비 레버 제한</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-new">KOL watcher</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">ZachXBT/Lookonchain/Arkham 등 20인 화이트리스트</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono text-slate-500">6</td>
+          <td>
+            <div class="font-medium">KelpDAO rsETH 브리지 해킹</div>
+            <div class="text-xs text-slate-500">4월 19일 · LayerZero 검증 우회 · 116.5K rsETH</div>
+          </td>
+          <td><span class="chip chip-brand">온체인 이상 + DeFi 탑 프로토콜 공지</span></td>
+          <td><span class="mono">46min → hours</span></td>
+          <td><span class="chip chip-down">$292M 탈취 · Aave $177–196M bad debt · AAVE $111→$91 · ZRO $1.9→$1.4</span></td>
+          <td><span class="badge-ver">검증</span><div class="text-[10px] text-slate-500 mt-1">Coindesk/CryptoBriefing · 2026년 최대 DeFi exploit</div></td>
+          <td><span class="chip chip-down">AAVE / ZRO 즉시 숏</span><br><span class="chip chip-acc mt-1">rsETH/wETH 담보 LP 회피</span></td>
+          <td>
+            <div class="text-xs"><span class="badge-new">DeFi contagion map</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">Aave/Compound/Euler TVL + 담보 노출 실시간 매핑</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="mt-3 text-[11px] text-slate-500">
+    * "정황 근거" 표시 사례는 패턴·결과는 검증되나 단일 공식 출처가 부재한 경우입니다. 실전 진입 전 별도 확증이 필요합니다.
+  </div>
+</section>
+
+<!-- ============== YOUR STACK MAPPING ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">03 · Your Stack × News Strategy</div>
+      <h2 class="sectionTitle mt-1 text-white">이미 가진 인프라 · 남은 격차</h2>
+    </div>
+    <div class="text-xs text-slate-500">Inventory-first · 1:1 mapping 원칙</div>
+  </div>
+
+  <div class="mt-5 grid md:grid-cols-2 gap-4">
+    <!-- Have -->
+    <div class="glass rounded-2xl p-5">
+      <div class="flex items-center gap-2">
+        <span class="chip chip-up">HAVE</span>
+        <div class="text-sm text-slate-400">즉시 재사용 가능 자산</div>
+      </div>
+      <div class="mt-4 space-y-3 text-sm">
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">감지봇_v2</div>
+          <div class="text-slate-300">12거래소 WebSocket (Binance/Bybit/OKX/Bitget/Gate/HTX/KuCoin/Kraken/Coinbase/MEXC/Lighter/Hyperliquid) + orderbook_checker + listing_monitor + premium_tick_collector. <span class="text-emerald-300">→ 거래량 Z-score 모듈만 추가</span>하면 Case 1 커버.</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">hot-wallet-monitor</div>
+          <div class="text-slate-300">Solana/EVM/Tron 추적기 존재. <span class="text-emerald-300">→ 지갑 클러스터 라벨링 + 청산가 근접 감지</span> 덧붙이면 Case 3 대응.</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">cex_dominance_bot</div>
+          <div class="text-slate-300">Claude API + Playwright + SQLite WAL + GO/NO-GO 스코어. <span class="text-emerald-300">→ 공지/트윗 페이지 스크래퍼</span> 추가 시 Case 2/5의 "해석 엔진" 그대로 활용.</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">통합매도봇</div>
+          <div class="text-slate-300">Go 11거래소 어댑터 + 시장가/지정가 실행기 + KRW 상장 아비트라지. <span class="text-emerald-300">→ "뉴스 트리거 실행기"의 베이스 런타임</span>으로 직결 가능.</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">펀딩비트래커봇</div>
+          <div class="text-slate-300">FastAPI + Next.js 트래커. <span class="text-emerald-300">→ 펀딩비 레짐 변화 감지기</span> (|Δfunding| &gt; 3σ) 추가 시 Case 2 자동화.</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mono text-violet-300 text-xs pt-.5 w-28 shrink-0">현선봇_go / 통합김프봇</div>
+          <div class="text-slate-300">Go + Wails 클린 레이어 + Fernet env. <span class="text-emerald-300">→ 이벤트 드리븐 basis/premium trade</span>의 실행 계층.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing -->
+    <div class="glass rounded-2xl p-5">
+      <div class="flex items-center gap-2">
+        <span class="chip chip-down">GAP</span>
+        <div class="text-sm text-slate-400">없거나 약한 구성요소</div>
+      </div>
+      <div class="mt-4 space-y-3 text-sm">
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">KOL watcher</div><div class="text-slate-300">X/Twitter 화이트리스트 20인의 트윗을 저지연 수집 (Nitter/Nitter-RSS/fxtwitter 다중 백엔드). <span class="text-amber-300">news_signal_bot 내부에 구현 예정/부재</span>.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">공지 스크래퍼</div><div class="text-slate-300">Lighter · Hyperliquid · Bybit · Binance · Upbit · Bithumb 공지 페이지 diff 감지 + LLM 분류 (펀딩 변경/상장/파라미터).</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">DeFi 전염맵</div><div class="text-slate-300">Aave/Compound/Euler/Morpho의 collateral exposure 주기적 스냅샷 + 해킹 토큰 → 영향 프로토콜 즉시 매핑.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">이벤트 분류기</div><div class="text-slate-300">actionable vs noise · 방향 · 시간 스케일 · 심볼 추출. Claude/GPT 혼합, 규칙 기반 사전필터로 토큰 비용 제한.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">멱등 주문기</div><div class="text-slate-300">news:{event_id}:{leg} 형식 client_order_id 표준화. 재시도·롤백 포함. <span class="text-amber-300">사진의 핵심 원칙</span>.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">서브넷/생태계 그래프</div><div class="text-slate-300">TAO·Eigenlayer·Symbiotic 등 모듈러 네트워크의 operator↔subnet 의존성. Case 4 자동 감지용.</div></div>
+        <div class="flex items-start gap-3"><div class="mono text-rose-300 text-xs pt-.5 w-28 shrink-0">이벤트 저널 + 백테스터</div><div class="text-slate-300">뉴스 이벤트 타임스탬프 + 1분봉 교차. 전략 사후 평가 없이 과신하지 않기 위한 필수 피드백 루프.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== WHAT TO BUILD ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">04 · What to Build</div>
+      <h2 class="sectionTitle mt-1 text-white">신규 모듈 7개 · 우선순위 순</h2>
+    </div>
+    <div class="text-xs text-slate-500">각 모듈 ≤ 5파일 · 단일 책임</div>
+  </div>
+
+  <div class="mt-5 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <!-- Card 1 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M1 · P0</div>
+          <div class="text-lg font-semibold mt-1">signal_hub</div>
+          <div class="text-xs text-slate-400 mt-1">모든 이벤트가 지나는 단일 토픽 버스</div>
+        </div>
+        <span class="chip chip-brand">DDD Core</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        <span class="kbd">RawSignal</span> → <span class="kbd">ClassifiedEvent</span> → <span class="kbd">TradePlan</span> 3스테이지 파이프.
+        Redis Streams 또는 NATS. 각 소비자는 <span class="text-cyan-300">멱등</span>.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · asyncio · redis-py / nats.py</div>
+      <div class="mt-2 bar"><span style="width:15%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 2일 · 현재 0%</div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M2 · P0</div>
+          <div class="text-lg font-semibold mt-1">kol_watcher</div>
+          <div class="text-xs text-slate-400 mt-1">KOL 20인 트윗 &lt;30s 수집·해시·중복 억제</div>
+        </div>
+        <span class="chip chip-cyan">Speed Edge</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        백엔드 3중화: <span class="kbd">api.fxtwitter.com</span> · Nitter RSS · 공식 API.
+        화이트리스트: ZachXBT · Lookonchain · Arkham · aixbt · tier1_vcs · 0xSun 본인 등.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · httpx · lxml · polling + SSE fanout</div>
+      <div class="mt-2 bar"><span style="width:10%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · 규약: CLAUDE.md "X 직접 실패 → fxtwitter 사용"</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M3 · P0</div>
+          <div class="text-lg font-semibold mt-1">exchange_notice_diff</div>
+          <div class="text-xs text-slate-400 mt-1">공지 페이지 HTML diff + LLM 분류</div>
+        </div>
+        <span class="chip chip-acc">Case 2, 5</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        대상: Lighter · Hyperliquid · Binance · Bybit · OKX · Upbit · Bithumb · Gate · Bitget.
+        카테고리: 상장/상폐 · 펀딩 파라미터 · 증거금 조정 · 조사 착수.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · playwright · difflib · Claude Haiku 분류</div>
+      <div class="mt-2 bar"><span style="width:5%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일 · cex_dominance_bot Playwright 재활용</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M4 · P1</div>
+          <div class="text-lg font-semibold mt-1">volume_zscore_trigger</div>
+          <div class="text-xs text-slate-400 mt-1">감지봇_v2 확장 · 이상 거래량 → 그리드 배포</div>
+        </div>
+        <span class="chip chip-cyan">Case 1</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        1분봉 기준 20일 거래량 롤링 μ,σ. Z &gt; 6 + 진폭 &lt; 1%면 <span class="text-cyan-300">MM 오작동 패턴</span>.
+        Ladder 주문: 중심가 ±0.3/0.5/0.7% 5틱, max 체결수 한도.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · numpy · 현 WS 데이터 스트림 재사용</div>
+      <div class="mt-2 bar"><span style="width:20%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · Paper trade 2주 선행 필수</div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M5 · P1</div>
+          <div class="text-lg font-semibold mt-1">defi_contagion_map</div>
+          <div class="text-xs text-slate-400 mt-1">담보 exposure 매핑 · 해킹 즉시 파급 대상 도출</div>
+        </div>
+        <span class="chip chip-acc">Case 6</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        Aave/Compound/Euler/Morpho/Spark의 <span class="kbd">eMode/isolated</span> 파라미터·총노출 일단위 스냅샷.
+        해킹 토큰 입력→영향 토큰 리스트(<span class="text-rose-300">AAVE·COMP·MORPHO·브리지 토큰</span>) 즉시 반환.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · web3.py · The Graph · DefiLlama API</div>
+      <div class="mt-2 bar"><span style="width:5%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M6 · P1</div>
+          <div class="text-lg font-semibold mt-1">wallet_cluster_tracker</div>
+          <div class="text-xs text-slate-400 mt-1">hot-wallet-monitor 확장 · 청산가·출금 임박 지표</div>
+        </div>
+        <span class="chip chip-brand">Case 3</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        Arkham/Nansen 라벨 병합. Hyperliquid/dYdX/Lighter 지갑의 포지션·마진 추적 → <span class="text-amber-300">liq_distance &lt; 5%</span> 시 short cascade alert.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · async · arkham/nansen/hyperliquid api</div>
+      <div class="mt-2 bar"><span style="width:8%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="grid-card p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs text-violet-300 mono">M7 · P2</div>
+          <div class="text-lg font-semibold mt-1">event_journal + backtester</div>
+          <div class="text-xs text-slate-400 mt-1">모든 이벤트·주문·PnL 기록 + 리플레이</div>
+        </div>
+        <span class="chip chip-slate">Reality Check</span>
+      </div>
+      <div class="mt-3 text-sm text-slate-300">
+        SQLite WAL(cex_dominance_bot 패턴) 재사용. 이벤트 타임스탬프 + 1분봉 JOIN으로 <span class="text-emerald-300">사후 PnL</span> 자동 산출.
+        <span class="text-rose-300">Survivorship bias</span> 탐지: 실패 거래까지 전부 기록 의무.
+      </div>
+      <div class="mt-3 text-xs text-slate-500 mono">python · sqlite · pandas · streamlit dashboard</div>
+      <div class="mt-2 bar"><span style="width:0%"></span></div>
+      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============== SOURCE UNIVERSE ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">05 · Source Universe</div>
+      <h2 class="sectionTitle mt-1 text-white">무엇을 감시할 것인가 · KOL · 공지 · 온체인 지도</h2>
+    </div>
+    <div class="text-xs text-slate-500">kol_watcher · exchange_notice_diff · defi_contagion_map 의 실제 입력 집합</div>
+  </div>
+
+  <!-- KOL Whitelist -->
+  <div class="mt-6 grid-card overflow-hidden">
+    <div class="px-5 py-3 border-b border-[#141826] flex items-baseline justify-between">
+      <div>
+        <div class="text-sm font-semibold text-white">KOL Whitelist (20인)</div>
+        <div class="text-xs text-slate-500 mt-0.5">fxtwitter 폴링 · 티어별 진입 신뢰도 차등</div>
+      </div>
+      <div class="text-[11px] text-slate-500">실시간 목표 레이턴시 <span class="mono text-cyan-300">&lt; 30s</span></div>
+    </div>
+    <div class="overflow-x-auto h-scroll">
+    <table class="min-w-full text-sm rowhover">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Handle</th>
+          <th>전문 영역</th>
+          <th>대표 사례</th>
+          <th>진입 신뢰도</th>
+          <th>주의점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="chip chip-brand">T1 On-chain</span></td><td class="mono">@zachxbt</td><td>조사·고발</td><td>Case 5 RAVE · Euler exploit</td><td><span class="chip chip-down">★★★★★</span></td><td>거래소 대응 후 급변</td></tr>
+        <tr><td><span class="chip chip-brand">T1 On-chain</span></td><td class="mono">@lookonchain</td><td>지갑 플로우 스캔</td><td>대형 출금·디파짓</td><td><span class="chip chip-down">★★★★</span></td><td>해석은 직접</td></tr>
+        <tr><td><span class="chip chip-brand">T1 On-chain</span></td><td class="mono">@ArkhamIntel</td><td>라벨링</td><td>세력 지갑 노출</td><td><span class="chip chip-down">★★★★</span></td><td>광고성 트윗 다수</td></tr>
+        <tr><td><span class="chip chip-brand">T1 On-chain</span></td><td class="mono">@SpotOnChain</td><td>지갑·CEX 플로우</td><td>대규모 입금 예고</td><td><span class="chip chip-down">★★★</span></td><td>false positive 多</td></tr>
+
+        <tr><td><span class="chip chip-cyan">T2 Exchange</span></td><td class="mono">@cz_binance</td><td>매크로·Binance 신호</td><td>상장/제재 코멘트</td><td><span class="chip chip-up">★★★★</span></td><td>방향 모호한 트윗 多</td></tr>
+        <tr><td><span class="chip chip-cyan">T2 Exchange</span></td><td class="mono">@heyibinance</td><td>Binance 운영</td><td>상장 힌트</td><td><span class="chip chip-up">★★★</span></td><td>중국어 병기</td></tr>
+        <tr><td><span class="chip chip-cyan">T2 Exchange</span></td><td class="mono">@GracyBitget</td><td>Bitget CEO</td><td>Case 5 RAVE 조사 착수</td><td><span class="chip chip-down">★★★★</span></td><td>조사=즉시 숏 시그널</td></tr>
+        <tr><td><span class="chip chip-cyan">T2 Exchange</span></td><td class="mono">@CryptoHayes</td><td>BitMEX 창립</td><td>매크로 논평</td><td><span class="chip chip-slate">★★ (매크로)</span></td><td>직접 시그널 약함</td></tr>
+
+        <tr><td><span class="chip chip-acc">T3 Trader</span></td><td class="mono">@cobie</td><td>매크로 트레이딩</td><td>reflexivity 지적</td><td><span class="chip chip-slate">★★★</span></td><td>진입가 비명시</td></tr>
+        <tr><td><span class="chip chip-acc">T3 Trader</span></td><td class="mono">@pentosh1</td><td>매크로·차트</td><td>알트 톱 시그널</td><td><span class="chip chip-slate">★★★</span></td><td>방향성 해석 필요</td></tr>
+        <tr><td><span class="chip chip-acc">T3 Trader</span></td><td class="mono">@hsakatrades</td><td>단기 스캘핑</td><td>깜빡이는 거래량</td><td><span class="chip chip-slate">★★</span></td><td>트레이딩 의견 반영용</td></tr>
+        <tr><td><span class="chip chip-acc">T3 Trader</span></td><td class="mono">@CryptoKaleo</td><td>차트 TA</td><td>알트 종목 지목</td><td><span class="chip chip-slate">★★</span></td><td>관심 유발용 다수</td></tr>
+
+        <tr><td><span class="chip chip-up">T4 Research</span></td><td class="mono">@0xSunNFT</td><td>이벤트 리서치</td><td>본 분석 원문</td><td><span class="chip chip-slate">★★★</span></td><td>사후 복기 중심</td></tr>
+        <tr><td><span class="chip chip-up">T4 Research</span></td><td class="mono">@aixbt_agent</td><td>AI 시그널</td><td>narrative 점수</td><td><span class="chip chip-slate">★★</span></td><td>실제 알파 낮음, 참고용</td></tr>
+        <tr><td><span class="chip chip-up">T4 Research</span></td><td class="mono">@0xngmi</td><td>DeFi 리서치</td><td>TVL·브리지 이슈</td><td><span class="chip chip-down">★★★</span></td><td>Case 6류 DeFi 이벤트</td></tr>
+        <tr><td><span class="chip chip-up">T4 Research</span></td><td class="mono">@DefiIgnas</td><td>DeFi 분석</td><td>프로토콜 파라미터</td><td><span class="chip chip-slate">★★★</span></td><td>해석 속도 빠름</td></tr>
+
+        <tr><td><span class="chip chip-slate">T5 Meta</span></td><td class="mono">@inversebrah</td><td>역지표·밈</td><td>과열 신호</td><td><span class="chip chip-up">★★ (역방향)</span></td><td>반대로 읽기</td></tr>
+        <tr><td><span class="chip chip-slate">T5 Meta</span></td><td class="mono">@AutismCapital</td><td>밈·사건</td><td>리테일 센티</td><td><span class="chip chip-slate">★★</span></td><td>확증편향 주의</td></tr>
+        <tr><td><span class="chip chip-slate">T5 Meta</span></td><td class="mono">@FatManTerra</td><td>폭로·고발</td><td>프로젝트 의심 제기</td><td><span class="chip chip-down">★★★</span></td><td>감정적 어조</td></tr>
+        <tr><td><span class="chip chip-slate">T5 Meta</span></td><td class="mono">@GCRClassic</td><td>고수 트레이더</td><td>암시적 포지션</td><td><span class="chip chip-slate">★★</span></td><td>공개 트윗 드뭄</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="px-5 py-3 text-[11px] text-slate-500 border-t border-[#141826]">
+      * 핸들은 예시이며 실제 운영 시 본인 판단으로 교체 · `config/kol_whitelist.json` 으로 버전관리.
+    </div>
+  </div>
+
+  <!-- Exchange Notice + Onchain 2-col -->
+  <div class="mt-6 grid lg:grid-cols-2 gap-4">
+
+    <!-- Exchange Notice -->
+    <div class="grid-card overflow-hidden">
+      <div class="px-5 py-3 border-b border-[#141826]">
+        <div class="text-sm font-semibold text-white">거래소 공지 감시 대상 (9곳)</div>
+        <div class="text-xs text-slate-500 mt-0.5">HTML diff 주기 · 변경 즉시 LLM 분류기 투입</div>
+      </div>
+      <div class="overflow-x-auto h-scroll">
+      <table class="min-w-full text-sm rowhover">
+        <thead>
+          <tr><th>거래소</th><th>페이지 패턴</th><th>주기</th><th>핵심 카테고리</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="font-medium">Binance</td><td class="mono text-[11px]">binance.com/en/support/announcement</td><td><span class="mono">30s</span></td><td>상장·제재·증거금</td></tr>
+          <tr><td class="font-medium">Upbit</td><td class="mono text-[11px]">upbit.com/service_center/notice</td><td><span class="mono">20s</span></td><td>KRW 상장·경보</td></tr>
+          <tr><td class="font-medium">Bithumb</td><td class="mono text-[11px]">m.bithumb.com/customer/notice_list</td><td><span class="mono">20s</span></td><td>KRW 상장·투자유의</td></tr>
+          <tr><td class="font-medium">Bybit</td><td class="mono text-[11px]">announcements.bybit.com/en-US/</td><td><span class="mono">30s</span></td><td>펀딩 파라미터·상장</td></tr>
+          <tr><td class="font-medium">OKX</td><td class="mono text-[11px]">okx.com/help/section/announcements-latest</td><td><span class="mono">30s</span></td><td>증거금·상장</td></tr>
+          <tr><td class="font-medium">Gate</td><td class="mono text-[11px]">gate.io/announcements</td><td><span class="mono">60s</span></td><td>상장 선행 多</td></tr>
+          <tr><td class="font-medium">Bitget</td><td class="mono text-[11px]">bitget.com/support/sections</td><td><span class="mono">30s</span></td><td>조사·상장</td></tr>
+          <tr><td class="font-medium">Hyperliquid</td><td class="mono text-[11px]">hyperliquid.xyz + Discord 공식</td><td><span class="mono">60s</span></td><td>파라미터·상장</td></tr>
+          <tr><td class="font-medium">Lighter</td><td class="mono text-[11px]">docs.lighter.xyz + 공식 X</td><td><span class="mono">60s</span></td><td>펀딩 캡·수수료</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <!-- Onchain + DeFi -->
+    <div class="grid-card overflow-hidden">
+      <div class="px-5 py-3 border-b border-[#141826]">
+        <div class="text-sm font-semibold text-white">온체인 · DeFi 데이터 소스</div>
+        <div class="text-xs text-slate-500 mt-0.5">wallet_cluster_tracker · defi_contagion_map 입력</div>
+      </div>
+      <div class="overflow-x-auto h-scroll">
+      <table class="min-w-full text-sm rowhover">
+        <thead>
+          <tr><th>소스</th><th>용도</th><th>인터페이스</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="font-medium">Arkham</td><td>지갑 라벨 · 세력 추적</td><td class="mono text-[11px]">intel.arkm.com · REST</td></tr>
+          <tr><td class="font-medium">Nansen</td><td>Smart Money · CEX flow</td><td class="mono text-[11px]">api.nansen.ai</td></tr>
+          <tr><td class="font-medium">Hyperliquid API</td><td>DEX 포지션·마진</td><td class="mono text-[11px]">api.hyperliquid.xyz/info</td></tr>
+          <tr><td class="font-medium">DefiLlama</td><td>TVL·체인·수익률</td><td class="mono text-[11px]">api.llama.fi</td></tr>
+          <tr><td class="font-medium">Dune</td><td>커스텀 쿼리·알림</td><td class="mono text-[11px]">dune.com/queries</td></tr>
+          <tr><td class="font-medium">Etherscan / Solscan</td><td>트랜잭션 실시간</td><td class="mono text-[11px]">*.api.etherscan.io · public-api.solscan.io</td></tr>
+          <tr><td class="font-medium">DexScreener</td><td>DEX 가격·유동성</td><td class="mono text-[11px]">api.dexscreener.com</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="px-5 py-3 border-t border-[#141826]">
+        <div class="text-sm font-semibold text-white">전염맵 대상 프로토콜</div>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          <span class="chip chip-brand">Aave V3/V4</span>
+          <span class="chip chip-brand">Compound V3</span>
+          <span class="chip chip-brand">Euler V2</span>
+          <span class="chip chip-brand">Morpho Blue</span>
+          <span class="chip chip-brand">Spark</span>
+          <span class="chip chip-cyan">Pendle</span>
+          <span class="chip chip-cyan">EtherFi / Kelp / Renzo (LRT)</span>
+          <span class="chip chip-acc">LayerZero / Wormhole / Axelar (브리지)</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-2">각 프로토콜의 <span class="mono">eMode · isolated · asset cap</span> 파라미터를 일단위 스냅샷. Case 6류 해킹 시 영향 토큰 즉시 반환.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coverage Matrix -->
+  <div class="mt-6 grid-card p-5">
+    <div class="text-sm font-semibold text-white">소스 × 사례 커버리지</div>
+    <div class="text-xs text-slate-500 mt-0.5">각 사례가 어떤 소스로 조기 포착 가능한가</div>
+    <div class="mt-4 overflow-x-auto h-scroll">
+      <table class="min-w-full text-xs">
+        <thead>
+          <tr>
+            <th>사례</th>
+            <th class="text-center">KOL</th>
+            <th class="text-center">공지</th>
+            <th class="text-center">거래량 WS</th>
+            <th class="text-center">지갑</th>
+            <th class="text-center">DeFi 스냅샷</th>
+            <th>선행 채널</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1 ETH MM 오작동</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td>감지봇_v2 Z-score</td></tr>
+          <tr><td>2 Lighter ARC 펀딩</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td>공지 + 펀딩 스냅샷</td></tr>
+          <tr><td>3 Fartcoin 지갑</td><td class="text-center text-amber-400">◐</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td>Hyperliquid API 잔고</td></tr>
+          <tr><td>4 TAO Covenant 이탈</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-amber-400">◐</td><td class="text-center text-slate-600">—</td><td>프로젝트 공식 계정</td></tr>
+          <tr><td>5 RAVE 조사</td><td class="text-center text-emerald-400">●</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-slate-600">—</td><td>ZachXBT + Bitget 연쇄</td></tr>
+          <tr><td>6 KelpDAO 해킹</td><td class="text-center text-amber-400">◐</td><td class="text-center text-amber-400">◐</td><td class="text-center text-slate-600">—</td><td class="text-center text-emerald-400">●</td><td class="text-center text-emerald-400">●</td><td>온체인 이상 + DeFi 맵</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3 text-[11px] text-slate-500">● 주 채널 · ◐ 보조 채널 · — 해당 없음. 모든 주 채널을 병렬 구동하면 6사례 평균 포착 지연 <span class="mono text-cyan-300">&lt; 2분</span>.</div>
+  </div>
+</section>
+
+<!-- ============== STRATEGY PLAYBOOK ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">06 · Strategy Playbook</div>
+      <h2 class="sectionTitle mt-1 text-white">이벤트 유형 × 포지션 레시피</h2>
+    </div>
+    <div class="text-xs text-slate-500">0xSun 레짐: BTC Long / Alt Short</div>
+  </div>
+
+  <div class="mt-5 grid-card overflow-hidden">
+    <div class="overflow-x-auto h-scroll">
+    <table class="min-w-full text-sm rowhover">
+      <thead>
+        <tr>
+          <th>이벤트 유형</th>
+          <th>방향 신뢰도</th>
+          <th>시간 스케일</th>
+          <th>진입</th>
+          <th>사이징</th>
+          <th>리스크 게이트</th>
+          <th>롤백 조건</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="font-medium">거래소 해킹 / 브리지 exploit</td>
+          <td><span class="chip chip-down">★★★★★</span></td>
+          <td><span class="mono">5–60min</span></td>
+          <td>1차: 피해 토큰 숏 · 2차: 담보 보유 프로토콜 토큰 숏</td>
+          <td>계좌 equity의 2–3%</td>
+          <td>TVL &gt; $50M · CEX 거래 가능 심볼만</td>
+          <td>30분 내 공식 보상 발표 시 80% 커버</td>
+        </tr>
+        <tr>
+          <td class="font-medium">KOL 조사 촉구 (ZachXBT 등)</td>
+          <td><span class="chip chip-down">★★★★</span></td>
+          <td><span class="mono">1–24h</span></td>
+          <td>숏 래더 (현재가 / −5% / −15%)</td>
+          <td>1–2%</td>
+          <td>유동성 $1M+ 선물 · 펀딩 &lt; 1%/8h</td>
+          <td>프로젝트 공식 해명 + CEX 무대응 시 50% 커버</td>
+        </tr>
+        <tr>
+          <td class="font-medium">생태계 핵심 운영자 이탈</td>
+          <td><span class="chip chip-down">★★★★</span></td>
+          <td><span class="mono">hours–days</span></td>
+          <td>1차 즉시 · 2차 추세 확인 후 추가</td>
+          <td>2–3% (장기)</td>
+          <td>프로젝트 시총 &gt; $200M</td>
+          <td>복귀 선언 / 신규 핵심 영입 공지</td>
+        </tr>
+        <tr>
+          <td class="font-medium">거래소 파라미터 변경 (funding cap 등)</td>
+          <td><span class="chip chip-down">★★★</span></td>
+          <td><span class="mono">4–12h</span></td>
+          <td>변경 방향에 맞춰 숏 / 펀딩 수취</td>
+          <td>1–2%</td>
+          <td>단일 거래소 고립 유동성이면 크기 절반</td>
+          <td>세력 재진입 증거 · OI 재증가</td>
+        </tr>
+        <tr>
+          <td class="font-medium">MM 스크립트 오작동 / 거래량 이상</td>
+          <td><span class="chip chip-up">★★★ (평균회귀)</span></td>
+          <td><span class="mono">minutes</span></td>
+          <td>지정가 그리드 역방향 (±0.3/0.5/0.7%)</td>
+          <td>틱당 0.1% · max 총 0.5%</td>
+          <td>진폭 &gt; 2% 시 진입 중단</td>
+          <td>패턴 붕괴 (추세 발생)</td>
+        </tr>
+        <tr>
+          <td class="font-medium">밈/조작 코인 지갑 털기</td>
+          <td><span class="chip chip-down">★★★</span></td>
+          <td><span class="mono">hours</span></td>
+          <td>클러스터 잔고 &lt; 30% + 청산가 근접 시 숏</td>
+          <td>0.5–1% (고분산)</td>
+          <td>Hyperliquid/dYdX 유동성 $500K+</td>
+          <td>잔고 재충전 · 지갑 신규 라벨</td>
+        </tr>
+        <tr>
+          <td class="font-medium">베이스 레짐: BTC Long / Alt Short</td>
+          <td><span class="chip chip-brand">★★★ (구조)</span></td>
+          <td><span class="mono">weeks</span></td>
+          <td>BTC Long 0.3R + Alt basket Short 0.3R (델타 헷지)</td>
+          <td>각 4–6% · 5–8개 알트 바스켓</td>
+          <td>비완전유통 · 언락 클리프 90일 내 · 서사 노후</td>
+          <td>BTC.D 하락 전환 + ETH/BTC 반등</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="mt-4 grid md:grid-cols-2 gap-4">
+    <div class="glass rounded-2xl p-5">
+      <div class="text-sm font-semibold text-white">알트 숏 바스켓 · 0xSun 선정 기준 이식</div>
+      <div class="text-xs text-slate-500 mt-1">cex_dominance_bot GO/NO-GO 스코어에 3필터 추가만</div>
+      <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
+        <li>• <span class="text-violet-300">비완전유통</span>: circulating / max supply &lt; 50%</li>
+        <li>• <span class="text-violet-300">신규 아님</span>: 상장일 &gt; 12개월</li>
+        <li>• <span class="text-violet-300">서사 노후</span>: L1·L2 old gen, DEX agg, 메타버스 등</li>
+        <li>• 펀딩 &lt; 0.02%/8h (과도하게 비싸면 비용이 숏 알파 잠식)</li>
+        <li>• 거래소 3곳 이상 선물 상장 (청산 리스크 분산)</li>
+      </ul>
+    </div>
+    <div class="glass rounded-2xl p-5">
+      <div class="text-sm font-semibold text-white">리스크 게이트 (trading-safety.md 준수)</div>
+      <div class="text-xs text-slate-500 mt-1">기존 룰 그대로 적용 · 이벤트 전략은 <em>추가 제약</em></div>
+      <ul class="mt-3 text-sm space-y-1.5 text-slate-300">
+        <li>• 레버리지 <span class="text-amber-300">≤ 10x 기본</span>, 고신뢰 이벤트에서만 20x</li>
+        <li>• 총 익스포저 ≤ equity × 15%</li>
+        <li>• 이벤트당 손실 한도: −1R (= 1.5%)</li>
+        <li>• 연속 3회 실패 → 자동 정지 (error-handling.md)</li>
+        <li>• KRW 신규 상장: 시장가 금지, 지정가 0.98/1.02만 (memory)</li>
+        <li>• 동시주문: 유동성 낮은 쪽 먼저, 실패시 즉시 롤백 (simultaneous-order.md)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== ROADMAP ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">07 · Execution Roadmap</div>
+      <h2 class="sectionTitle mt-1 text-white">4주 계획 · Phase 별 5파일 이하 원칙</h2>
+    </div>
+    <div class="text-xs text-slate-500">wave-completion.md 4단계 게이트 통과 필수</div>
+  </div>
+
+  <div class="mt-6 grid md:grid-cols-4 gap-4">
+    <div class="grid-card p-5">
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="text-xs text-violet-300 mono">WEEK 1 · FOUNDATION</div>
+        <div class="mt-1 font-semibold text-white">Signal Hub + Journal</div>
+        <ul class="mt-2 text-xs text-slate-300 space-y-1">
+          <li>• M1 signal_hub (Redis Streams)</li>
+          <li>• M7 event_journal 스키마</li>
+          <li>• domain/ 레이어 스캐폴딩</li>
+          <li>• Telegram 알림 템플릿</li>
+        </ul>
+        <div class="mt-3 text-[11px] text-slate-500">게이트: go build / py_compile / 1건 수동 이벤트 투입 smoke</div>
+      </div>
+    </div>
+
+    <div class="grid-card p-5">
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="text-xs text-violet-300 mono">WEEK 2 · FAST SIGNALS</div>
+        <div class="mt-1 font-semibold text-white">KOL + Notice + Volume</div>
+        <ul class="mt-2 text-xs text-slate-300 space-y-1">
+          <li>• M2 kol_watcher (20인 화이트리스트)</li>
+          <li>• M3 exchange_notice_diff (9거래소)</li>
+          <li>• M4 volume_zscore_trigger (감지봇_v2 확장)</li>
+          <li>• paper trade 모드</li>
+        </ul>
+        <div class="mt-3 text-[11px] text-slate-500">게이트: 2주간 라이브 신호 수집 · 사후 PnL ≥ 0 확인 전 실매매 금지</div>
+      </div>
+    </div>
+
+    <div class="grid-card p-5">
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="text-xs text-violet-300 mono">WEEK 3 · ON-CHAIN</div>
+        <div class="mt-1 font-semibold text-white">Wallet + DeFi Map</div>
+        <ul class="mt-2 text-xs text-slate-300 space-y-1">
+          <li>• M5 defi_contagion_map</li>
+          <li>• M6 wallet_cluster_tracker</li>
+          <li>• Aave/Compound/Morpho TVL 스냅샷</li>
+          <li>• Hyperliquid 포지션 API</li>
+        </ul>
+        <div class="mt-3 text-[11px] text-slate-500">게이트: 과거 KelpDAO 해킹 리플레이 통과 (결과 재현)</div>
+      </div>
+    </div>
+
+    <div class="grid-card p-5">
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="text-xs text-violet-300 mono">WEEK 4 · EXECUTE</div>
+        <div class="mt-1 font-semibold text-white">Execution + Retro</div>
+        <ul class="mt-2 text-xs text-slate-300 space-y-1">
+          <li>• 통합매도봇 런타임 연동</li>
+          <li>• 멱등 client_order_id 전체 어댑터 적용</li>
+          <li>• backtester + 주간 retro 자동화</li>
+          <li>• 실거래 전환 (testnet 48h 선행)</li>
+        </ul>
+        <div class="mt-3 text-[11px] text-slate-500">게이트: e2e-smoke-test.md 전 항목 통과 · 텔레그램 증거 저장</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 glass rounded-2xl p-5">
+    <div class="text-sm font-semibold text-white">측정 KPI</div>
+    <div class="mt-3 grid md:grid-cols-4 gap-4">
+      <div><div class="text-[10px] text-slate-400 tracking-widest uppercase">이벤트 포착 레이턴시</div><div class="text-2xl font-semibold text-cyan-300 num">&lt; 10s</div><div class="text-[11px] text-slate-500 mt-1">소스 → classified event</div></div>
+      <div><div class="text-[10px] text-slate-400 tracking-widest uppercase">actionable 비율</div><div class="text-2xl font-semibold text-violet-300 num">5–15%</div><div class="text-[11px] text-slate-500 mt-1">너무 낮으면 소스 부족 · 너무 높으면 분류기 관대</div></div>
+      <div><div class="text-[10px] text-slate-400 tracking-widest uppercase">히트율 (PnL &gt; 0)</div><div class="text-2xl font-semibold text-emerald-300 num">≥ 55%</div><div class="text-[11px] text-slate-500 mt-1">이 아래면 전략 분해 재검토</div></div>
+      <div><div class="text-[10px] text-slate-400 tracking-widest uppercase">최대 드로다운</div><div class="text-2xl font-semibold text-amber-300 num">≤ 8%</div><div class="text-[11px] text-slate-500 mt-1">넘으면 자동 사이즈 1/2</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== RISKS ============== -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">08 · Reality Check</div>
+      <h2 class="sectionTitle mt-1 text-white">0xSun이 말하지 않은 6가지 리스크</h2>
+    </div>
+  </div>
+
+  <div class="mt-5 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 1</div>
+      <div class="mt-2 font-semibold">Survivorship</div>
+      <p class="text-sm text-slate-300 mt-1">복기는 이긴 거래만 보여준다. 동시기간 실패한 이벤트 페이드를 저널에 강제 기록.</p>
+    </div>
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 2</div>
+      <div class="mt-2 font-semibold">페이크 뉴스</div>
+      <p class="text-sm text-slate-300 mt-1">조작된 트윗·딥페이크·가짜 공지 가능. KOL + 온체인 2소스 교차 확인 전 진입 금지.</p>
+    </div>
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 3</div>
+      <div class="mt-2 font-semibold">유동성 함정</div>
+      <p class="text-sm text-slate-300 mt-1">숏 진입 시점이 바닥. Ladder + max position, 단일 틱 체결 한도 설정.</p>
+    </div>
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 4</div>
+      <div class="mt-2 font-semibold">역저격</div>
+      <p class="text-sm text-slate-300 mt-1">지갑 클러스터 추적은 세력도 본다. 공개 추적이 숏스퀴즈 재료가 되는 역사 多.</p>
+    </div>
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 5</div>
+      <div class="mt-2 font-semibold">레이턴시 경쟁</div>
+      <p class="text-sm text-slate-300 mt-1">0.1초 차이로 가격이 이미 반영된 경우 多. 1분 지나면 얼리 알파 소멸.</p>
+    </div>
+    <div class="glass rounded-2xl p-5 border-rose-900/30">
+      <div class="chip chip-down">Risk 6</div>
+      <div class="mt-2 font-semibold">LLM slop</div>
+      <p class="text-sm text-slate-300 mt-1">분류기가 가짜 심볼·허상 이벤트 생성 가능. 실제 CEX/DeFi에 존재하지 않는 심볼은 거부.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== ACTION CARDS ============== -->
+<section class="max-w-7xl mx-auto px-6 pt-6 pb-16">
+  <div class="flex items-baseline justify-between gap-4">
+    <div>
+      <div class="text-xs tracking-widest text-slate-500 uppercase">09 · Next Actions</div>
+      <h2 class="sectionTitle mt-1 text-white">내일 아침 바로 할 일 3가지</h2>
+    </div>
+  </div>
+  <div class="mt-5 grid md:grid-cols-3 gap-4">
+    <div class="grid-card p-5 ribbon">
+      <div class="text-xs text-violet-300 mono">Action 1 · 30분</div>
+      <div class="text-lg font-semibold text-white mt-1">news_signal_bot 스켈레톤 커밋</div>
+      <p class="text-sm text-slate-300 mt-1"><span class="kbd">domain/</span> · <span class="kbd">application/</span> · <span class="kbd">infrastructure/</span> 디렉토리 + README 30줄. 파일 0개도 OK, 경계만 확정.</p>
+    </div>
+    <div class="grid-card p-5 ribbon">
+      <div class="text-xs text-violet-300 mono">Action 2 · 2시간</div>
+      <div class="text-lg font-semibold text-white mt-1">KOL 화이트리스트 JSON 확정</div>
+      <p class="text-sm text-slate-300 mt-1">ZachXBT · Lookonchain · Arkham · aixbt · 0xSunNFT · pentosh1 · Cobie · hsakatrades · tier1_vcs · 대형 거래소 CEO 20인. fxtwitter로 폴링 샘플 확보.</p>
+    </div>
+    <div class="grid-card p-5 ribbon">
+      <div class="text-xs text-violet-300 mono">Action 3 · 3시간</div>
+      <div class="text-lg font-semibold text-white mt-1">감지봇_v2 volume Z-score 브랜치</div>
+      <p class="text-sm text-slate-300 mt-1">premium_tick_storage 옆에 volume_zscore.py 추가. 20일 롤링, Z &gt; 6 이벤트를 signal_hub로 퍼블리시. 주문은 아직 없이 <span class="text-emerald-300">paper mode</span>.</p>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-wrap gap-2 text-[11px] text-slate-500">
+    <span class="chip chip-slate">원문: <a class="underline hover:text-slate-300" href="https://x.com/0xSunNFT/status/2045760821188551055" target="_blank">@0xSunNFT</a></span>
+    <span class="chip chip-slate">Fact sources: Coindesk · CryptoBriefing · Coincu · CCN · Yahoo Finance</span>
+    <span class="chip chip-slate">Generated: 2026-04-20 · 한국어 기본</span>
+  </div>
+</section>
+
+<footer class="border-t border-[#141826] py-6 text-center text-[11px] text-slate-500">
+  대시보드는 읽는 용도. 실거래 전 testnet 48시간 · wave-completion.md 4단계 게이트 필수. "빌드 통과 ≠ 작동".
+</footer>
+
+</body>
+</html>

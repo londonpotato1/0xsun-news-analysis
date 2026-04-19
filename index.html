@@ -300,7 +300,19 @@
     <div class="text-xs text-slate-500">각 모듈 ≤ 5파일 · 단일 책임</div>
   </div>
 
-  <div class="mt-5 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <style>
+    .mdsec{padding-top:.35rem;}
+    .mdsec+.mdsec{margin-top:.55rem;padding-top:.55rem;border-top:1px dashed rgba(255,255,255,.05);}
+    .mdtag{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:.08rem .4rem;border-radius:4px;display:inline-block;}
+    .tag-what{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
+    .tag-how{background:rgba(6,182,212,.15);color:#67e8f9;border:1px solid rgba(6,182,212,.3);}
+    .tag-io{background:rgba(16,185,129,.12);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
+    .tag-why{background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+    .tag-trap{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
+    .mdbody{margin-top:.35rem;font-size:.82rem;line-height:1.55;color:#cbd5e1;}
+    .mdbody .kbd{font-size:.7rem;}
+  </style>
+  <div class="mt-5 grid md:grid-cols-2 gap-4">
 
     <!-- Card 1 -->
     <div class="grid-card p-5">
@@ -312,13 +324,38 @@
         </div>
         <span class="chip chip-brand">DDD Core</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        <span class="kbd">RawSignal</span> → <span class="kbd">ClassifiedEvent</span> → <span class="kbd">TradePlan</span> 3스테이지 파이프.
-        Redis Streams 또는 NATS. 각 소비자는 <span class="text-cyan-300">멱등</span>.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">소스(KOL·공지·거래량·지갑·DeFi)와 소비자(분류기·전략·실행기) 사이의 <b>단일 메시지 배관</b>. 소스 N개 × 소비자 M개의 직결을 N+M 연결로 축소해, 한쪽을 교체해도 나머지를 안 건드린다.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · asyncio · redis-py / nats.py</div>
-      <div class="mt-2 bar"><span style="width:15%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 2일 · 현재 0%</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">Redis Streams 3단 토픽: <span class="kbd">signals.raw</span> → <span class="kbd">signals.classified</span> → <span class="kbd">trades.planned</span>.
+        Producer는 <span class="kbd">XADD</span>, Consumer는 <span class="kbd">XREADGROUP</span> + <span class="kbd">XACK</span>로 at-least-once. 각 이벤트 ID는 <span class="kbd">sha256(source|url|ts)</span>로 전역 유일 → 재전송돼도 무해.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: 모듈들이 발행하는 Python dataclass 메시지<br>OUT: 각 스테이지에 구독 중인 소비자로 브로드캐스트</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">전 사례 공통 배관. 이게 없으면 "KOL 트윗 → 주문기 직접 호출"처럼 로직이 얽히고, 하나 고장 시 전체 연쇄 실패.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">메시지 보존 정책 (<span class="kbd">MAXLEN ~ 10K</span>), Dead-letter queue, 재시작 시 consumer offset 유실 방지.</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · asyncio · redis-py / nats.py</div>
+        <div class="mt-2 bar"><span style="width:15%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 2일 · 현재 0%</div>
+      </div>
     </div>
 
     <!-- Card 2 -->
@@ -331,13 +368,37 @@
         </div>
         <span class="chip chip-cyan">Speed Edge</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        백엔드 3중화: <span class="kbd">api.fxtwitter.com</span> · Nitter RSS · 공식 API.
-        화이트리스트: ZachXBT · Lookonchain · Arkham · aixbt · tier1_vcs · 0xSun 본인 등.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">트위터 화이트리스트 20명 (ZachXBT · Lookonchain · Arkham · aixbt · 0xSun 등)의 새 트윗을 <b>30초 이내에 포착</b>해 signal_hub로 흘려보내는 폴러.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · httpx · lxml · polling + SSE fanout</div>
-      <div class="mt-2 bar"><span style="width:10%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · 규약: CLAUDE.md "X 직접 실패 → fxtwitter 사용"</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">3중 백엔드로 장애 내성 확보: ① <span class="kbd">api.fxtwitter.com</span>(무인증·기본), ② Nitter RSS(차단 시 fallback), ③ 공식 Twitter API(유료·마지막). 계정별 <span class="kbd">last_tweet_id</span> 기억해 중복 제거. 인용 트윗·썸네일·media_keys까지 구조화.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: <span class="kbd">config/kol_whitelist.json</span> + 핸들별 폴링 주기<br>OUT: <span class="kbd">RawSignal{source:'kol', handle, text, urls, ts, media}</span></div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">Case 4 Covenant AI 공식 발표, Case 5 ZachXBT 조사 촉구 — 첫 트윗 30초 내 진입이 알파의 90%.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">트위터 rate limit · 삭제된 트윗 재소환 방지 · 계정 탈취·딥페이크 방어 (프로필 변경 감지) · 광고 트윗 필터.</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · httpx · lxml · polling + SSE fanout</div>
+        <div class="mt-2 bar"><span style="width:10%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · 규약: CLAUDE.md "X 직접 실패 → fxtwitter 사용"</div>
+      </div>
     </div>
 
     <!-- Card 3 -->
@@ -350,13 +411,37 @@
         </div>
         <span class="chip chip-acc">Case 2, 5</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        대상: Lighter · Hyperliquid · Binance · Bybit · OKX · Upbit · Bithumb · Gate · Bitget.
-        카테고리: 상장/상폐 · 펀딩 파라미터 · 증거금 조정 · 조사 착수.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">9개 거래소 공지 페이지를 주기적으로 방문해 <b>이전 스냅샷과 다른 항목</b>을 찾고, LLM으로 상장·펀딩·증거금·조사 등으로 분류.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · playwright · difflib · Claude Haiku 분류</div>
-      <div class="mt-2 bar"><span style="width:5%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일 · Playwright 어댑터 재활용</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">Playwright가 JS 렌더링 완료까지 기다려 공지 DOM 수집 → 공지 ID 리스트의 해시 비교로 신규 항목만 식별 → Claude Haiku(저비용)에 제목+요약을 투입해 <span class="kbd">{category, symbol, direction}</span> 추출. 로컬 diff 캐시는 SQLite.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: 거래소별 URL · 폴링 주기<br>OUT: <span class="kbd">RawSignal{source:'notice', exchange, category, symbol, direction, url}</span></div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">Case 2 Lighter 펀딩 급등·Case 5 Bitget 조사 대응 — 거래소 정책 변경은 수분 내 수십 % 움직임을 유발.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">봇 차단(Cloudflare) — 회전 User-Agent + 프록시 풀 필요 · 다국어 공지(KR/EN/JP/CN) · Upbit/Bithumb "투자유의"류 미묘한 신호 놓치지 말 것 · LLM 비용은 신규 항목에만.</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · playwright · difflib · Claude Haiku</div>
+        <div class="mt-2 bar"><span style="width:5%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일 · Playwright 어댑터 재활용</div>
+      </div>
     </div>
 
     <!-- Card 4 -->
@@ -369,13 +454,37 @@
         </div>
         <span class="chip chip-cyan">Case 1</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        1분봉 기준 20일 거래량 롤링 μ,σ. Z &gt; 6 + 진폭 &lt; 1%면 <span class="text-cyan-300">MM 오작동 패턴</span>.
-        Ladder 주문: 중심가 ±0.3/0.5/0.7% 5틱, max 체결수 한도.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">기존 WS 가격 스트림에서 <b>거래량은 폭발했는데 가격은 좁은 밴드에서 핑퐁</b>하는 MM 오작동 패턴을 실시간 탐지하는 감지기.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · numpy · 현 WS 데이터 스트림 재사용</div>
-      <div class="mt-2 bar"><span style="width:20%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · Paper trade 2주 선행 필수</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">심볼별 20일 1분봉 거래량의 rolling <span class="kbd">μ, σ</span>를 유지. 새 분봉이 닫히면 <span class="kbd">Z = (vol − μ)/σ</span> 계산 · 동시에 진폭 = (high−low)/mid. Z &gt; 6 AND 진폭 &lt; 1%면 이상 감지 → 중심가 기준 ±0.3/0.5/0.7%에 Ladder 지정가. Paper mode 2주 검증 후에만 실전.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: 12거래소 WS 1분봉 스트림<br>OUT: <span class="kbd">RawSignal{kind:'vol_anomaly', symbol, center, width, levels}</span></div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">Case 1 ETH $2040–$2060 10분 핑퐁. 사람은 못 잡음. 기계만 가능한 평균회귀 현금.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">뉴스성 폭증도 Z가 높음 → 동시에 진폭 조건 필수 · 심볼별 임계값 캘리브레이션 · 최대 총 체결수 cap으로 독점 체결 방지.</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · numpy · 기존 WS 스트림 재사용</div>
+        <div class="mt-2 bar"><span style="width:20%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 3일 · Paper trade 2주 선행 필수</div>
+      </div>
     </div>
 
     <!-- Card 5 -->
@@ -388,13 +497,37 @@
         </div>
         <span class="chip chip-acc">Case 6</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        Aave/Compound/Euler/Morpho/Spark의 <span class="kbd">eMode/isolated</span> 파라미터·총노출 일단위 스냅샷.
-        해킹 토큰 입력→영향 토큰 리스트(<span class="text-rose-300">AAVE·COMP·MORPHO·브리지 토큰</span>) 즉시 반환.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">DeFi 담보 노출 그래프. <b>"토큰 X가 해킹/붕괴되면 어떤 프로토콜·토큰이 2차 타격인가"</b>에 응답하는 지도.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · web3.py · The Graph · DefiLlama API</div>
-      <div class="mt-2 bar"><span style="width:5%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">web3.py + The Graph + DefiLlama로 Aave V3/V4 · Compound V3 · Euler V2 · Morpho Blue · Spark의 담보 자산별 총 노출·<span class="kbd">eMode</span>·<span class="kbd">isolated</span>·supply cap을 일단위 스냅샷 → 그래프 DB. 해킹 토큰 입력하면 BFS로 영향 노드 탐색 → <span class="kbd">[(symbol, exposure_usd, confidence), …]</span> 반환.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: 해킹·디페그·조작 의심 토큰 심볼<br>OUT: 영향 토큰 리스트 + 노출액 · 예: rsETH 해킹 → <span class="kbd">[(AAVE, $196M, high), (MORPHO, $40M, med), (ZRO, brand contagion, sentiment)]</span></div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">Case 6 KelpDAO → AAVE −18%, ZRO −26%. 전염 거래 창은 <b>수분 단위</b>. 수동 매핑으로는 늦음.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">eMode/isolated 파라미터는 자주 변함 — 캐시 신선도 중요 · 담보 노출이 아닌 "브랜드 전염"(ZRO=LayerZero)은 별도 카테고리 · RPC 비용 제어 (읽기 전용 노드 활용).</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · web3.py · The Graph · DefiLlama API</div>
+        <div class="mt-2 bar"><span style="width:5%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+      </div>
     </div>
 
     <!-- Card 6 -->
@@ -407,16 +540,41 @@
         </div>
         <span class="chip chip-brand">Case 3</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        Arkham/Nansen 라벨 병합. Hyperliquid/dYdX/Lighter 지갑의 포지션·마진 추적 → <span class="text-amber-300">liq_distance &lt; 5%</span> 시 short cascade alert.
+
+      <div class="mdsec">
+        <span class="mdtag tag-what">무엇</span>
+        <div class="mdbody">동일 세력이 운용하는 <b>지갑 그룹을 식별</b>하고, 해당 그룹이 DEX에 잡은 포지션의 <b>청산가까지 거리</b>를 실시간 감시해 강제청산 캐스케이드를 예측.</div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · async · arkham/nansen/hyperliquid api</div>
-      <div class="mt-2 bar"><span style="width:8%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-how">어떻게</span>
+        <div class="mdbody">Arkham/Nansen 공개 라벨 병합 + 자체 heuristic(펀딩 address·transfer 빈도·동일 CEX 출금). Hyperliquid/dYdX/Lighter 포지션 API로 그룹 지갑의 <span class="kbd">entry, size, leverage, liq_price</span> 주기 조회. <span class="kbd">liq_distance = (mark − liq)/mark</span> &lt; 5%면 alert.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-io">입력 → 출력</span>
+        <div class="mdbody">IN: 감시 클러스터 ID (자동 발굴 or 수동 추가)<br>OUT: <span class="kbd">RawSignal{kind:'liq_risk', cluster, symbol, liq_distance, side, notional}</span></div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-why">왜</span>
+        <div class="mdbody">Case 3 Fartcoin 조작 세력 역저격 — DEX는 포지션이 투명해 캐스케이드 타이밍 예측 가능.</div>
+      </div>
+
+      <div class="mdsec">
+        <span class="mdtag tag-trap">함정</span>
+        <div class="mdbody">세력도 본인 지갑이 추적되는 걸 안다 → 역-역저격(의도적 short squeeze) 가능 · 클러스터 오탐지 시 오판 · 너무 낮은 liq_distance 알림은 스팸.</div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · async · arkham/nansen/hyperliquid api</div>
+        <div class="mt-2 bar"><span style="width:8%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 5일</div>
+      </div>
     </div>
 
     <!-- Card 7 -->
-    <div class="grid-card p-5">
+    <div class="grid-card p-5 md:col-span-2">
       <div class="flex items-start justify-between">
         <div>
           <div class="text-xs text-violet-300 mono">M7 · P2</div>
@@ -425,13 +583,39 @@
         </div>
         <span class="chip chip-slate">Reality Check</span>
       </div>
-      <div class="mt-3 text-sm text-slate-300">
-        SQLite WAL 패턴 재사용. 이벤트 타임스탬프 + 1분봉 JOIN으로 <span class="text-emerald-300">사후 PnL</span> 자동 산출.
-        <span class="text-rose-300">Survivorship bias</span> 탐지: 실패 거래까지 전부 기록 의무.
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <div class="mdsec">
+            <span class="mdtag tag-what">무엇</span>
+            <div class="mdbody">발생한 <b>모든 이벤트 · 모든 주문 · 체결 결과 · PnL</b>을 불변으로 기록하고, 이벤트 타임스탬프를 1분봉에 조인해 사후 PnL을 자동 산출하는 저널 + 리플레이 엔진.</div>
+          </div>
+          <div class="mdsec">
+            <span class="mdtag tag-how">어떻게</span>
+            <div class="mdbody">SQLite WAL · 테이블 <span class="kbd">events(id, source, ts, kind, symbol, payload)</span> + <span class="kbd">orders(id, event_id, exchange, side, size, fill_ts, fill_px)</span>. 일단위 배치로 1분봉과 JOIN → 가설 PnL vs 실현 PnL. Streamlit 주간 retro.</div>
+          </div>
+          <div class="mdsec">
+            <span class="mdtag tag-io">입력 → 출력</span>
+            <div class="mdbody">IN: signal_hub의 모든 토픽 + executor의 주문/체결<br>OUT: 이벤트별 PnL attribution · 전략 히트율 · 드로다운 · 리플레이 API</div>
+          </div>
+        </div>
+        <div>
+          <div class="mdsec">
+            <span class="mdtag tag-why">왜</span>
+            <div class="mdbody"><b>Survivorship bias 차단</b>. 0xSun 복기는 이긴 거래만 보여주지만, 저널은 실패까지 전부 기록 → <span class="kbd">히트율 ≥ 55%</span>, <span class="kbd">MDD ≤ 8%</span> 게이트로 실매매 허용 여부 판단. 이 모듈 없이 실매매 허용은 <b>자기기만</b>.</div>
+          </div>
+          <div class="mdsec">
+            <span class="mdtag tag-trap">함정</span>
+            <div class="mdbody">멱등 쓰기 (동일 event_id 재진입 시 no-op) · 스키마 버전 관리 (payload JSON 진화) · 리플레이 결정성 — 당시 체결 가능했던 가격(best bid/ask 스냅샷) 없이 fill_px만 기록하면 "사후 완벽 체결" 착각 발생.</div>
+          </div>
+        </div>
       </div>
-      <div class="mt-3 text-xs text-slate-500 mono">python · sqlite · pandas · streamlit dashboard</div>
-      <div class="mt-2 bar"><span style="width:0%"></span></div>
-      <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일</div>
+
+      <div class="mt-4 pt-3 border-t border-[#141826]">
+        <div class="text-xs text-slate-500 mono">python · sqlite (WAL) · pandas · streamlit dashboard</div>
+        <div class="mt-2 bar"><span style="width:0%"></span></div>
+        <div class="text-[11px] text-slate-500 mt-1">추정 공수: 4일</div>
+      </div>
     </div>
 
   </div>
